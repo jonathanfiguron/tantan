@@ -1,21 +1,21 @@
-const express = require("express");
-const mysql = require("mysql2");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const bodyParser = require("body-parser");
-const app = express();
+// const express = require("express");
+// // const mysql = require("mysql2");
+// // const jwt = require("jsonwebtoken");
+// // const bcrypt = require("bcrypt");
+// const bodyParser = require("body-parser");
+// const app = express();
 
-const cors = require("cors");
-app.use(cors());
-const PORT = process.env.PORT || 4438;
+// const cors = require("cors");
+// app.use(cors());
+// const PORT = process.env.PORT || 4438;
 
-const secretKey = "figuron-secret-key";
+// const secretKey = "figuron-secret-key";
 
+ 
+ 
+// app.use(bodyParser.json());
 
-
-app.use(bodyParser.json());
-
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 const {router, bcrypt, db ,authenticateToken ,jsonwebtoken} =  require("./importModule");
 
 router.post("/Employees/register", async (req, res) => {
@@ -26,7 +26,7 @@ router.post("/Employees/register", async (req, res) => {
         "INSERT INTO Employees (EmployeeID, FirstName, LastName, Email, Phone, DepartmentID, PositionID) VALUES (?, ?, ?, ?, ?, ?, ?)";
       await db
         .promise()
-        .execute(insertEmployeesQuery, [EmployeeID, FirstName, LastName, Email, Phone, DepartmentID, PositionID]);
+        .execute(inserEmployeesQuery, [EmployeeID, FirstName, LastName, Email, Phone, DepartmentID, PositionID]);
   
       res.status(201).json({ message: "employee registered successfully" });
     } catch (error) {
@@ -131,11 +131,11 @@ router.delete("/Employees/:id", authenticateToken, (req, res) =>  {
        }
 });
 
-app.get("/", (req, res) => {
-    res.json({ message: "Restful API Backend Using ExpressJS" });
-  });
-  app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-  });
+// app.get("/", (req, res) => {
+//     res.json({ message: "Restful API Backend Using ExpressJS" });
+//   });
+//   app.listen(PORT, () => {
+//   console.log(`Server is running on http://localhost:${PORT}`);
+//   });
 
 module.exports = router

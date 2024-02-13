@@ -13,6 +13,7 @@ app.use('/', require('./router/authenticatedUser/user/Addresses'))
 app.use('/', require('./Positions'))
 app.use('/', require('./Department'))
 app.use('/', require('./Salaries'))
+app.use('/', require('./Employees'))
 
 app.listen(process.env.PORT, () => {
     console.log("server started")
