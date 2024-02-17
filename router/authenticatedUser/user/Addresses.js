@@ -1,32 +1,34 @@
 const {router, bcrypt, db ,authenticateToken ,jsonwebtoken} =  require("../../../importModule");
 
-router.post("/addresses/register", async (req, res) => {
+  router.post("/Addresses/register", async (req, res) => {
     try {
-      const { AddressID, EmployeeID, AddressLine1, City } = req.body;
+      const {AddressID, EmployeeID, AddressLine1, City} = req.body;
   
       const insertAddressesQuery =
         "INSERT INTO Addresses (AddressID, EmployeeID, AddressLine1, City) VALUES (?, ?, ?, ?)";
       await db
         .promise()
-        .execute(insertaddressesQuery, [AddressID, AddressID, AddressLine1, City]);
+        .execute(insertAddressesQuery, [AddressID, EmployeeID, AddressLine1, City]);
   
-      res.status(201).json({ message: "addresses registered successfully" });
+      res.status(201).json({ message: "Addresses registered successfully" });
     } catch (error) {
-      console.error("Error registering addresses:", error);
+      console.error("Error registering dept:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   });
+  
 
-router.get('/addresses/:id',authenticateToken, (req, res) => {
+
+router.get('/Addresses/:id',authenticateToken, (req, res) => {
     let AddressID = req.params.id;
 
     if (!AddressID) {
-        return res.status(400).send({error: true, message :'Please provide indicator_ID'});
+        return res.status(400).send({error: true, message :'Please provide AddressID'});
     }
     try{
-        db.query('select id, AddressID, EmployeeID, AddressLine1, City FROM Addresses WHERE id = ?', AddressID, (err, result) => {
+        db.query('SELECT * FROM Addresses WHERE AddressID = ?', AddressID, (err, result) => {
           if(err){
-            console.error('erroe fetching items:', err);
+            console.error('error fetching items:', err);
             res.status(500).json({ message: 'Internal server error'})
           } else {
             res.status(200).json(result);
@@ -40,77 +42,79 @@ router.get('/addresses/:id',authenticateToken, (req, res) => {
     }
 });
 
-
-router.get('/addresses',authenticateToken, (req, res) => {
+router.get('/Addresses', authenticateToken,(req, res) => {
 
     try {
-        db.query('SELECT id, AddressID, EmployeeID, AddressLine1, City FROM Addresses',(err, result) => {
+        db.query('SELECT * FROM Addresses',(err, result) => {
 
             if(err) {
                 console.error('error fetching items:', err);
-                req.status(500).json({ error: 'Internal Server Error' });
+                res.status(500).json({ error: 'Internal Server Error' });
             }else{
                 res.status(200).json({result});
             }
         });
 
     } catch (error) {
-        console.error('Error loading addresses', error);
+        console.error('Error loading users', error);
         res.status(200).json({ error: 'Internal Server Error' });
     }
 });
 
 
 
-router.put('/addresses/:id', authenticateToken, async (req,  res) => {
-    let employeesID = req.params.id;
-
-    const{EmployeeID, AddressLine1, City} = req.body;
-
-    if (!EmployeeID || !AddressLine1 || !City) {
-        return res.status(400).send({error: user,message:'please provide ADDRESS code'});
-    } 
-
-    try { 
-        db.query('UPDATE Addresses SET AddressID = ?, EmployeeID = ?, AddressLine1 = ?, City = ?  WHERE id = ?',[description, user_id, evaluation_id, indicator_id],(err,result, fields) => {
-        if (err){
-            console.error('error updating:', err);
-            res.status(500).json({message:'internall server error'});
-        }else {
-            res.status(200).json(result);
+router.put('/Addresses/:id', authenticateToken, async (req, res) => {
+    try {
+      const addressID = req.params.id;
+      const { EmployeeID, AddressLine1, City } = req.body;
+  
+      if (!addressID || !EmployeeID || !AddressLine1 || !City) {
+        return res.status(400).json({ message: 'Please provide address ID, employee ID, address line 1, and city' });
+      }
+  
+      db.query('UPDATE Addresses SET EmployeeID = ?, AddressLine1 = ?, City = ? WHERE AddressID = ?', [EmployeeID, AddressLine1, City, addressID], (err, result) => {
+        if (err) {
+          console.error('Error updating address:', err);
+          return res.status(500).json({ message: 'Internal server error' });
         }
-    });
-
+  
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Address not found' });
+        }
+  
+        res.status(200).json({ message: 'Address updated successfully' });
+      });
     } catch (error) {
-        console.error('error loading user', error);
-        res.status(500).json({ error: 'internnal server error' });
+      console.error('Error updating address:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
+  });
 
-});
 
-
-router.delete("/addresses/:id", authenticateToken, (req, res) =>  {
-    
-    let AddressID = req.params.id;
-
-    if (!AddressID) {
-        return res.status(400).send({ error: true, message: 'please provide AddressID' });
-    }
-       try {
-        db.query('DELETE FROM Addresses WHERE id = ?', AddressID, (err, result, fields) => {
-
-            if (err) {
-                console.error('error deleting items', err);
-                res.status(500).json({message: 'inetrnal server error'});
-            } else {
-                res.status(200).json(result);
+  router.delete("/Addresses/:id", authenticateToken, (req, res) => {
+    try {
+      const addressID = req.params.id;
+  
+      if (!addressID) {
+        return res.status(400).json({ error: true, message: 'Please provide AddressID' });
+      }
+  
+      db.query('DELETE FROM Addresses WHERE AddressID = ?', [addressID], (err, result) => {
+        if (err) {
+          console.error('Error deleting address:', err);
+          return res.status(500).json({ message: 'Internal server error' });
         }
-    });
-
-       }catch (error){
-        console.error('error loadng user:', error);
-        res.status(500).json({error: ' internal serever error'});
-       }
-});
+  
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Address not found' });
+        }
+  
+        res.status(200).json({ message: 'Address deleted successfully' });
+      });
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 
 module.exports = router

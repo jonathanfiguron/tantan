@@ -4,15 +4,15 @@ router.post("/Salaries/register", async (req, res) => {
     try {
       const {SalaryID, EmployeeID, SalaryAmount} = req.body;
   
-      const insertSalariesQuery =
+      const inserSalariesQuery =
         "INSERT INTO Salaries (SalaryID, EmployeeID, SalaryAmount) VALUES (?, ?, ?)";
       await db
         .promise()
-        .execute(insertSalariesQuery, [SalaryID, EmployeeID, SalaryAmount]);
+        .execute(inserSalariesQuery, [SalaryID, EmployeeID, SalaryAmount]);
   
-      res.status(201).json({ message: "Salaries registered successfully" });
+      res.status(201).json({ message: "salary registered successfully" });
     } catch (error) {
-      console.error("Error registering Salaries:", error);
+      console.error("Error registering salari:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   });
@@ -21,12 +21,12 @@ router.get('/Salaries/:id',authenticateToken, (req, res) => {
     let SalaryID = req.params.id;
 
     if (!SalaryID) {
-        return res.status(400).send({error: true, message :'Please provide SalariesID'});
+        return res.status(400).send({error: true, message :'Please provide EmployeeID'});
     }
     try{
-        db.query('select id, SalaryID, EmployeeID, SalaryAmount FROM Salaries WHERE id = ?', SalaryID, (err, result) => {
+        db.query('SELECT * FROM Salaries WHERE SalaryID = ?', SalaryID, (err, result) => {
           if(err){
-            console.error('erroe fetching items:', err);
+            console.error('error fetching items:', err);
             res.status(500).json({ message: 'Internal server error'})
           } else {
             res.status(200).json(result);
@@ -41,21 +41,21 @@ router.get('/Salaries/:id',authenticateToken, (req, res) => {
 });
 
 
-router.get('/Salaries',authenticateToken, (req, res) => {
+router.get('/Salaries', authenticateToken,(req, res) => {
 
     try {
-        db.query('SELECT id, SalaryID, EmployeeID, SalaryAmount FROM Salaries',(err, result) => {
+        db.query('SELECT * FROM Salaries',(err, result) => {
 
             if(err) {
                 console.error('error fetching items:', err);
-                req.status(500).json({ error: 'Internal Server Error' });
+                res.status(500).json({ error: 'Internal Server Error' });
             }else{
                 res.status(200).json({result});
             }
         });
 
     } catch (error) {
-        console.error('Error loading Salaries', error);
+        console.error('Error loading users', error);
         res.status(200).json({ error: 'Internal Server Error' });
     }
 });
@@ -63,16 +63,16 @@ router.get('/Salaries',authenticateToken, (req, res) => {
 
 
 router.put('/Salaries/:id', authenticateToken, async (req,  res) => {
-    let Salaries = req.params.id;
+    let SalaryID = req.params.id;
 
-    const{SalaryID, EmployeeID, SalaryAmount} = req.body;
+    const{EmployeeID, SalaryAmount} = req.body;
 
-    if (!SalaryID || !EmployeeID || SalaryAmount) {
-        return res.status(400).send({error: user,message:'please provide ADDRESS code'});
+    if (!EmployeeID || !SalaryAmount) {
+        return res.status(400).send({message:'please provide role code and role name'});
     } 
 
     try { 
-        db.query('UPDATE Salaries SET SalaryID = ?, EmployeeID = ?, SalaryAmount = ?',[SalaryID, EmployeeID, SalaryAmount],(err,result, fields) => {
+        db.query('UPDATE Salaries SET EmployeeID = ?, SalaryAmount = ?',[EmployeeID, SalaryAmount],(err,result, fields) => {
         if (err){
             console.error('error updating:', err);
             res.status(500).json({message:'internall server error'});
@@ -89,28 +89,30 @@ router.put('/Salaries/:id', authenticateToken, async (req,  res) => {
 });
 
 
-router.delete("/Salaries/:id", authenticateToken, (req, res) =>  {
-    
-    let SalaryID = req.params.id;
-
-    if (!SalaryID) {
-        return res.status(400).send({ error: true, message: 'please provide PositionID' });
-    }
-       try {
-        db.query('DELETE FROM Salaries WHERE id = ?', SalaryID, (err, result, fields) => {
-
-            if (err) {
-                console.error('error deleting items', err);
-                res.status(500).json({message: 'inetrnal server error'});
-            } else {
-                res.status(200).json(result);
+router.delete("/Salaries/:id", authenticateToken, (req, res) => {
+    try {
+      const salaryID = req.params.id;
+  
+      if (!salaryID) {
+        return res.status(400).json({ error: true, message: 'Please provide SalaryID' });
+      }
+  
+      db.query('DELETE FROM Salaries WHERE SalaryID = ?', [salaryID], (err, result) => {
+        if (err) {
+          console.error('Error deleting salary:', err);
+          return res.status(500).json({ message: 'Internal server error' });
         }
-    });
-
-       }catch (error){
-        console.error('error loadng user:', error);
-        res.status(500).json({error: ' internal serever error'});
-       }
-});
+  
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Salary not found' });
+        }
+  
+        res.status(200).json({ message: 'Salary deleted successfully' });
+      });
+    } catch (error) {
+      console.error('Error deleting salary:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 
 module.exports = router
